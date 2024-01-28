@@ -1,0 +1,21 @@
+# Dada Ki Jay Ho
+
+
+version: '3'
+
+
+services:
+  elastic-search:
+    image: elasticsearch:7.17.17
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      - discovery.type=single-node
+  # node-app:
+  #   build: .
+  #   ports:
+  #     - 3001:3001
+
+  
+  

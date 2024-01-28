@@ -1,0 +1,32 @@
+{
+  "name": "elastic-search-with-rebbit-mq-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/app.js",
+  "scripts": {
+    "start": "tsc & node dist/app.js",
+    "start:dev": "tsc -w & nodemon dist/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@elastic/elasticsearch": "^7.17.13",
+    "@faker-js/faker": "^8.4.0",
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.21",
+    "body-parser": "^1.20.2",
+    "chalk": "^4.1.2",
+    "dotenv": "^16.4.1",
+    "express": "^4.18.2",
+    "faker": "^6.6.6",
+    "find-free-ports": "^3.1.1",
+    "nodemon": "^3.0.3",
+    "typescript": "^5.3.3",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.8"
+  }
+}
