@@ -13,29 +13,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchBlogByTitle = exports.indexDataToElasticSearch = exports.setupElasticSearch = void 0;
+exports.searchBlogByTitle = exports.indexDataToElasticSearch = exports.isElasticSearchUp = exports.setupElasticSearch = void 0;
 const elasticsearch_1 = require("@elastic/elasticsearch");
 const chalk_1 = __importDefault(require("chalk"));
 let client;
-const setupElasticSearch = () => {
+const setupElasticSearch = () => __awaiter(void 0, void 0, void 0, function* () {
+    if (client !== undefined)
+        return true;
     try {
         console.log(chalk_1.default.cyan("Setting up elastic search ⏳"));
         client = new elasticsearch_1.Client({
             node: "http://localhost:9200", // Elasticsearch endpoint
         });
+        yield client.ping();
         console.log(chalk_1.default.green("elastic search setup successfull 🎉\n"));
         return true;
     }
     catch (error) {
         console.log(chalk_1.default.red("failed to setup elastic search ❌\n"));
-        console.log(error);
         return false;
     }
-};
+});
 exports.setupElasticSearch = setupElasticSearch;
+const isElasticSearchUp = () => __awaiter(void 0, void 0, void 0, function* () {
+    return (0, exports.setupElasticSearch)();
+});
+exports.isElasticSearchUp = isElasticSearchUp;
 const indexDataToElasticSearch = (payloadList, chunkNumber) => __awaiter(void 0, void 0, void 0, function* () {
     if (client === undefined) {
-        if (yield (0, exports.setupElasticSearch)()) {
+        if (!(yield (0, exports.setupElasticSearch)())) {
             throw new Error("error occured while setting up Elastic Search");
         }
     }
@@ -45,15 +51,18 @@ const indexDataToElasticSearch = (payloadList, chunkNumber) => __awaiter(void 0,
                 // the action that you want to perform
                 _index: "blogs",
                 _type: "_doc",
-                _id: doc.id,
             },
         },
         doc, // the data on which given action should be performed
     ]);
-    // console.log(body); uncomment this line and see in more list to understand better
-    const { body: bulkResponse } = yield client.bulk({ refresh: true, body });
+    // console.log(body); //uncomment this line and see in more list to understand better
+    const { body: bulkResponse, statusCode, warnings, } = yield client.bulk({ refresh: true, body });
     if (bulkResponse.errors) {
+        // console.log(bulkResponse);
         console.error(chalk_1.default.red(bulkResponse.errors));
+        console.error(chalk_1.default.red(statusCode));
+        console.error(chalk_1.default.red(warnings));
+        console.error(chalk_1.default.red(JSON.stringify(bulkResponse)));
     }
     else {
         if (!chunkNumber)

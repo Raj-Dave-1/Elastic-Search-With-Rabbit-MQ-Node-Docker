@@ -16,8 +16,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const elastic_search_config_1 = require("./elastic-search-config");
 const chalk_1 = __importDefault(require("chalk"));
 const fs = require("fs");
-const runBulkIndexer = ({ bulkSize, dataSource, }) => {
+const runBulkIndexer = ({ bulkSize, dataSource, }) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(chalk_1.default.cyan("Initiating bulk indexing ⏳......."));
+    const isESUp = yield (0, elastic_search_config_1.isElasticSearchUp)();
+    if (!isESUp)
+        throw new Error("Failed to perform bulk indexing, Elastic Search is not running.....");
     const filePath = dataSource;
     let count = 0;
     const chunkSize = 1; // Adjust the chunk size as needed
@@ -64,11 +67,13 @@ const runBulkIndexer = ({ bulkSize, dataSource, }) => {
             // clear payload list
             payloadList = [];
         }
-        console.log(chalk_1.default.green("done with bulk indexing 🎉"));
-        console.log("File reading completed\n");
+        else {
+            console.log(chalk_1.default.green("done with bulk indexing 🎉"));
+            console.log("File reading completed\n");
+        }
     }));
     readStream.on("error", (err) => {
         console.error("Error reading file:", err);
     });
-};
+});
 runBulkIndexer({ bulkSize: 100, dataSource: 'blogs.json' });

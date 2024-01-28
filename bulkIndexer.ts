@@ -1,13 +1,12 @@
 // Dada Ki Jay Ho
 
-import { readFile, readFileSync } from "fs";
-import { indexDataToElasticSearch } from "./elastic-search-config";
+import { indexDataToElasticSearch, isElasticSearchUp } from "./elastic-search-config";
 import { IBlog } from "./model/blog";
 import chalk from "chalk";
 
 const fs = require("fs");
 
-const runBulkIndexer = ({
+const runBulkIndexer = async ({
   bulkSize,
   dataSource,
 }: {
@@ -15,6 +14,9 @@ const runBulkIndexer = ({
   dataSource: string;
 }) => {
   console.log(chalk.cyan("Initiating bulk indexing ⏳......."));
+
+  const isESUp = await isElasticSearchUp();
+  if(!isESUp) throw new Error("Failed to perform bulk indexing, Elastic Search is not running.....")
 
   const filePath = dataSource;
   let count = 0;
@@ -52,6 +54,7 @@ const runBulkIndexer = ({
         // clear payload list
         payloadList = [];
         count++;
+        
         await indexDataToElasticSearch(temp, count);
         console.log(
           chalk.gray(
@@ -71,9 +74,10 @@ const runBulkIndexer = ({
       // -------------------------------
       // clear payload list
       payloadList = [];
+    }else{
+      console.log(chalk.green("done with bulk indexing 🎉"));
+      console.log("File reading completed\n");
     }
-    console.log(chalk.green("done with bulk indexing 🎉"));
-    console.log("File reading completed\n");
   });
 
   readStream.on("error", (err: any) => {

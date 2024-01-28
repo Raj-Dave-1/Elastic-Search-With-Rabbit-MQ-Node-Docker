@@ -20,6 +20,7 @@ const elastic_search_config_1 = require("./elastic-search-config");
 const chalk_1 = __importDefault(require("chalk"));
 const child_process_1 = require("child_process");
 const path_1 = require("path");
+const queue_config_1 = require("./queue-config");
 const setupBackendApp = () => __awaiter(void 0, void 0, void 0, function* () {
     console.log(chalk_1.default.cyan("Initializing backend app ⏳......."));
     const app = (0, express_1.default)();
@@ -43,6 +44,8 @@ const init = () => __awaiter(void 0, void 0, void 0, function* () {
     dataFeedProcess.on("end", () => {
         console.log("done with data feeding");
     });
+    yield (new queue_config_1.RabbitMQ()).setup();
+    const mqListener = (0, child_process_1.fork)((0, path_1.join)(__dirname, "queue-listener.js"));
     yield setupBackendApp();
 });
 init();

@@ -11,16 +11,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.query = exports.add = void 0;
-const uuid_1 = require("uuid");
 const elastic_search_config_1 = require("../elastic-search-config");
-const add = (req, res) => {
+const queue_config_1 = require("../queue-config");
+const queueName = 'new_blog';
+const add = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { blogTitle, blogBody, tags } = req.body;
-    const newBlog = { id: (0, uuid_1.v4)(), title: blogTitle, body: blogBody, tag: tags || [] };
+    const newBlog = { id: Date.now().toString(), title: blogTitle, body: blogBody, tag: tags || [] };
     // adding new blog to ......
     console.log(`new blog added with title: ${newBlog.title}`);
     // add new blog to SQS
+    const channel = queue_config_1.RabbitMQ.channel;
+    if (channel === undefined)
+        throw new Error("Message Queue channel not initialized");
+    channel.assertQueue(queueName, { durable: false });
+    if (!channel.sendToQueue(queueName, Buffer.from(JSON.stringify(newBlog))))
+        throw new Error("failed to put message into queue");
     res.send("blog is published");
-};
+});
 exports.add = add;
 const query = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { title } = req.body;

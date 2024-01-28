@@ -8,6 +8,7 @@ import { setupElasticSearch } from "./elastic-search-config";
 import chalk from "chalk";
 import { fork } from "child_process";
 import { join } from "path";
+import { RabbitMQ } from "./queue-config";
 
 const setupBackendApp = async () => {
   console.log(chalk.cyan("Initializing backend app ⏳......."));
@@ -40,6 +41,10 @@ const init = async () => {
   dataFeedProcess.on("end",  () => {
     console.log("done with data feeding");
   });
+
+
+  await (new RabbitMQ()).setup();
+  const mqListener = fork(join(__dirname,"queue-listener.js"));
 
   await setupBackendApp();
 };

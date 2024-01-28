@@ -12,6 +12,11 @@ services:
       - 9300:9300
     environment:
       - discovery.type=single-node
+
+  rebbit-mq:
+    image: rabbitmq:3
+    ports:
+      - 5672:5672
   # node-app:
   #   build: .
   #   ports:
